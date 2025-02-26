@@ -9,7 +9,7 @@ footer: "ECL 2.0 Licensed | Copyright © [YYYY] [Your Name]"
 
 **Виконав(-ла):** 
 
-*студент 2-го курсу, групи ІО-33 **[Ушкалов Іван] [https://t.me/sunrisexg]**
+*студент 2-го курсу, групи ІО-33 **Ушкалов Іван https://t.me/sunrisexg**
 
 
 **Керівник**
