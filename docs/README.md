@@ -13,6 +13,7 @@ footer: "ECL 2.0 Licensed | Copyright © [YYYY] [Your Name]"
 
 *студент 2-го курсу, групи ІО-33 *<span padding-right:5em></span> **[Матюшенко Кирило] [https://t.me/Kiril4a_mvdk]**
 
+*студент 2-го курсу, групи ІО-33 **Філоненко Олександр [Телеграм](https://t.me/alefilonenko)
 
 
 **Керівник**
