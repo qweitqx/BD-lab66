@@ -132,3 +132,146 @@ AnalysisResult ||--o{ MediaContentAnalysisResult
 @enduml
 - реляційна схема
 
+@startuml
+hide circle
+skinparam linetype ortho
+
+
+hide circle
+skinparam linetype ortho
+
+entity User {
+  *id : int
+  --
+  first_name : varchar(45)
+  last_name : varchar(45)
+  email : varchar(45)
+  password : varchar(45)
+}
+
+entity Role {
+  *id : int
+  --
+  name : varchar(45)
+  description : varchar(255)
+}
+
+entity UserRole {
+  *user_id : int
+  *role_id : int
+}
+
+entity Permission {
+  *id : int
+  --
+  name : varchar(45)
+}
+
+entity RolePermission {
+  *role_id : int
+  *permission_id : int
+}
+
+entity MediaContent {
+  *id : int
+  --
+  Title : varchar(45)
+  Description : varchar(255)
+  Body : varchar(255)
+  content_type : varchar(45)
+  created_at : date
+  user_id : int
+}
+
+entity MediaContentSource {
+  *mediaContent_id : int
+  *source_id : int
+}
+
+entity MediaContentTag {
+  *mediaContent_id : int
+  *tag_id : int
+}
+
+entity MediaContentAnalysisResult {
+  *mediaContent_id : int
+  *analysisResult_id : int
+}
+
+entity Source {
+  *id : int
+  --
+  name : varchar(45)
+  url : varchar(255)
+}
+
+entity SourceTag {
+  *source_id : int
+  *tag_id : int
+}
+
+entity Tag {
+  *id : int
+  --
+  name : varchar(45)
+}
+
+entity AnalysisResult {
+  *id : int
+  --
+  Title : varchar(45)
+  Description : varchar(255)
+  Body : varchar(255)
+  created_at : date
+  user_id : int
+  analysisReport_id : int
+}
+
+entity AnalysisReport {
+  *id : int
+  --
+  Title : varchar(45)
+  Body : varchar(255)
+  created_at : date
+  user_id : int
+}
+
+entity AnalysisResultTag {
+  *analysisResult_id : int
+  *tag_id : int
+}
+
+entity AnalysisReportTag {
+  *analysisReport_id : int
+  *tag_id : int
+}
+
+' Relationships
+User ||--o{ UserRole
+Role ||--o{ UserRole
+Role ||--o{ RolePermission
+Permission ||--o{ RolePermission
+User ||--o{ MediaContent
+User ||--o{ AnalysisResult
+User ||--o{ AnalysisReport
+
+MediaContent ||--o{ MediaContentSource
+Source ||--o{ MediaContentSource
+
+MediaContent ||--o{ MediaContentTag
+Tag ||--o{ MediaContentTag
+
+MediaContent ||--o{ MediaContentAnalysisResult
+AnalysisResult ||--o{ MediaContentAnalysisResult
+
+Source ||--o{ SourceTag
+Tag ||--o{ SourceTag
+
+AnalysisResult ||--o{ AnalysisResultTag
+Tag ||--o{ AnalysisResultTag
+
+AnalysisReport ||--o{ AnalysisReportTag
+Tag ||--o{ AnalysisReportTag
+
+AnalysisResult ||--|| AnalysisReport
+@enduml
