@@ -24,16 +24,16 @@
 
 ## 📁 Приклад вихідного коду тесту
 
-**`MainMediaContentTest.java`**
+**`MainTagTest.java`**
 
 ```java
-import dao.MediaContentDAOImpl;
-import model.MediaContent;
+import dao.TagDAOImpl;
+import model.Tag;
 
 import java.sql.*;
 import java.util.List;
 
-public class MainMediaContentTest {
+public class MainTagTest {
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/bd_lab";
         String user = "root";
@@ -42,44 +42,36 @@ public class MainMediaContentTest {
         try (Connection conn = DriverManager.getConnection(url, user, password)) {
             System.out.println("Connected to database!");
 
-            MediaContentDAOImpl mediaDao = new MediaContentDAOImpl(conn);
+            TagDAOImpl tagDao = new TagDAOImpl(conn);
 
-            // Додати новий медіаконтент
-            MediaContent newMedia = new MediaContent(
-                0,
-                "Test Title",
-                "Test Description",
-                "This is the body of the media content.",
-                "text/plain",
-                new java.sql.Date(System.currentTimeMillis()),
-                1 // userId (має бути існуючий користувач у таблиці User)
-            );
+            // Додати новий тег
+            Tag newTag = new Tag(0, "Technology");
+            tagDao.addTag(newTag);
+            System.out.println("Tag inserted!");
 
-            mediaDao.addMediaContent(newMedia);
-            System.out.println("Media content inserted!");
-
-            // Отримати всі медіаконтенти
-            List<MediaContent> mediaList = mediaDao.getAllMediaContents();
-            for (MediaContent mc : mediaList) {
-                System.out.println(mc.getId() + ": " + mc.getTitle() + " - " + mc.getContentType());
+            // Отримати всі теги
+            List<Tag> tags = tagDao.getAllTags();
+            for (Tag tag : tags) {
+                System.out.println(tag.getId() + ": " + tag.getName());
             }
 
-            // Отримати медіаконтент за ID (наприклад, останній доданий)
-            if (!mediaList.isEmpty()) {
-                int lastId = mediaList.get(mediaList.size() - 1).getId();
-                MediaContent retrieved = mediaDao.getMediaContentById(lastId);
-                if (retrieved != null) {
-                    System.out.println("Retrieved: " + retrieved.getTitle());
+            // Отримати останній тег
+            if (!tags.isEmpty()) {
+                Tag lastTag = tags.get(tags.size() - 1);
+                Tag fetchedTag = tagDao.getTagById(lastTag.getId());
+
+                if (fetchedTag != null) {
+                    System.out.println("Fetched Tag: " + fetchedTag.getName());
+
+                    // Оновити тег
+                    fetchedTag.setName("UpdatedTag");
+                    tagDao.updateTag(fetchedTag);
+                    System.out.println("Tag updated!");
+
+                    // Видалити тег
+                    tagDao.deleteTag(fetchedTag.getId());
+                    System.out.println("Tag deleted!");
                 }
-
-                // Оновити
-                retrieved.setTitle("Updated Title");
-                mediaDao.updateMediaContent(retrieved);
-                System.out.println("Media content updated!");
-
-                // Видалити
-                mediaDao.deleteMediaContent(lastId);
-                System.out.println("Media content deleted!");
             }
 
         } catch (SQLException e) {
@@ -90,53 +82,43 @@ public class MainMediaContentTest {
 
 ```
 
-**`MediaContentDAOImpl.java`**
+**`TagDAOImpl.java`**
 
 ```java
 package dao;
 
-import model.MediaContent;
+import model.Tag;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MediaContentDAOImpl implements MediaContentDAO {
+public class TagDAOImpl implements TagDAO {
     private Connection connection;
 
-    public MediaContentDAOImpl(Connection connection) {
+    public TagDAOImpl(Connection connection) {
         this.connection = connection;
     }
 
     @Override
-    public void addMediaContent(MediaContent mc) throws SQLException {
-        String sql = "INSERT INTO MediaContent (title, description, body, content_type, created_at, user_Id) VALUES (?, ?, ?, ?, ?, ?)";
+    public void addTag(Tag tag) throws SQLException {
+        String sql = "INSERT INTO Tag (name) VALUES (?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, mc.getTitle());
-            ps.setString(2, mc.getDescription());
-            ps.setString(3, mc.getBody());
-            ps.setString(4, mc.getContentType());
-            ps.setDate(5, mc.getCreatedAt());
-            ps.setInt(6, mc.getUserId());
+            ps.setString(1, tag.getName());
             ps.executeUpdate();
         }
     }
 
     @Override
-    public MediaContent getMediaContentById(int id) throws SQLException {
-        String sql = "SELECT * FROM MediaContent WHERE id = ?";
+    public Tag getTagById(int id) throws SQLException {
+        String sql = "SELECT * FROM Tag WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new MediaContent(
+                    return new Tag(
                         rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        rs.getString("body"),
-                        rs.getString("content_type"),
-                        rs.getDate("created_at"),
-                        rs.getInt("user_Id")
+                        rs.getString("name")
                     );
                 }
             }
@@ -145,50 +127,41 @@ public class MediaContentDAOImpl implements MediaContentDAO {
     }
 
     @Override
-    public List<MediaContent> getAllMediaContents() throws SQLException {
-        List<MediaContent> list = new ArrayList<>();
-        String sql = "SELECT * FROM MediaContent";
+    public List<Tag> getAllTags() throws SQLException {
+        List<Tag> tags = new ArrayList<>();
+        String sql = "SELECT * FROM Tag";
         try (Statement st = connection.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                list.add(new MediaContent(
+                tags.add(new Tag(
                     rs.getInt("id"),
-                    rs.getString("title"),
-                    rs.getString("description"),
-                    rs.getString("body"),
-                    rs.getString("content_type"),
-                    rs.getDate("created_at"),
-                    rs.getInt("user_Id")
+                    rs.getString("name")
                 ));
             }
         }
-        return list;
+        return tags;
     }
 
     @Override
-    public void updateMediaContent(MediaContent mc) throws SQLException {
-        String sql = "UPDATE MediaContent SET title = ?, description = ?, body = ?, content_type = ?, created_at = ?, user_Id = ? WHERE id = ?";
+    public void updateTag(Tag tag) throws SQLException {
+        String sql = "UPDATE Tag SET name = ? WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, mc.getTitle());
-            ps.setString(2, mc.getDescription());
-            ps.setString(3, mc.getBody());
-            ps.setString(4, mc.getContentType());
-            ps.setDate(5, mc.getCreatedAt());
-            ps.setInt(6, mc.getUserId());
-            ps.setInt(7, mc.getId());
+            ps.setString(1, tag.getName());
+            ps.setInt(2, tag.getId());
             ps.executeUpdate();
         }
     }
 
     @Override
-    public void deleteMediaContent(int id) throws SQLException {
-        String sql = "DELETE FROM MediaContent WHERE id = ?";
+    public void deleteTag(int id) throws SQLException {
+        String sql = "DELETE FROM Tag WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 }
+
 ```
 ---
 
@@ -196,4 +169,5 @@ public class MediaContentDAOImpl implements MediaContentDAO {
 
 ![зображення](https://github.com/user-attachments/assets/9271f91e-dbdc-4369-a504-01136a2ccbb7)
 
-![зображення](https://github.com/user-attachments/assets/1d4f47be-f0d2-4755-9cbb-410d7e4a4ae1)
+![зображення](https://github.com/user-attachments/assets/d61d4a23-ed08-4e0f-b832-61c0d661afd1)
+
