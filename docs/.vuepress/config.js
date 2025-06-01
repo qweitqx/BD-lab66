@@ -15,7 +15,7 @@ module.exports = {
     }]
   ],
   port: 3030,
-  base: '/BD-lab1/',
+  base: '/BD-lab66/',
   theme: 'cool',
   // dest: 'dist',
   head: [
